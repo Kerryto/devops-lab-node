@@ -8,13 +8,11 @@
 import express from 'express'
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { createRequire } from 'node:module'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { errorHandler } from './utils/errorHandler.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const require = createRequire(import.meta.url)
 
 const app = express()
 
@@ -25,11 +23,13 @@ app.get('/health', (_req, res) => res.status(200).send('OK'))
 // Auto-mount all routers placed under src/routes/auto
 const autoDir = path.join(__dirname, 'routes', 'auto')
 if (fs.existsSync(autoDir)) {
-  const files = fs.readdirSync(autoDir).filter(f => f.endsWith('.route.js'))
+  // sort() : ordre de montage identique sur tous les OS
+  const files = fs.readdirSync(autoDir).filter(f => f.endsWith('.route.js')).sort()
   for (const f of files) {
-    const full = path.join(autoDir, f)
-    const mod = require(full)
-    const router = mod.default || mod
+    // import() dynamique (ESM natif) au lieu de require() :
+    // le fichier passe par Vitest, donc sa couverture est mesurée
+    const mod = await import(pathToFileURL(path.join(autoDir, f)).href)
+    const router = mod.default
     if (router) app.use('/', router)
   }
 }
