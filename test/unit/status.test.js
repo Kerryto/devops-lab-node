@@ -19,3 +19,24 @@ describe('formatStatus', () => {
     expect(formatStatus(3600)).toBe('steady')
   })
 })
+
+describe('formatStatus - invalid inputs', () => {
+  it.each([['abc'], [NaN], [undefined], [null]])(
+    'throws on non-numeric value %p',
+    (value) => {
+      expect(() => formatStatus(value)).toThrow('invalid uptime')
+    }
+  )
+})
+
+describe('formatStatus - boundaries', () => {
+  it.each([
+    [0, 'warming-up'],
+    [59, 'warming-up'],
+    [60, 'healthy'],
+    [3599, 'healthy'],
+    [3600, 'steady']
+  ])('formatStatus(%p) returns %p', (input, expected) => {
+    expect(formatStatus(input)).toBe(expected)
+  })
+})
