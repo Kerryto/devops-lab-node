@@ -1,5 +1,5 @@
 /**
- * Integration test for GET /boom.
+ * Integration test for GET /boom (DEVOPS-3).
  * Ensures global error handler shapes the response.
  */
 import request from 'supertest'
@@ -12,5 +12,11 @@ describe('GET /boom', () => {
     expect(res.status).toBe(500)
     expect(res.body.error).toBe(true)
     expect(typeof res.body.message).toBe('string')
+  })
+
+  it('returns JSON { error: true, message: "Boom!" } (no HTML stack trace)', async () => {
+    const res = await request(app).get('/boom')
+    expect(res.headers['content-type']).toMatch(/application\/json/)
+    expect(res.body).toEqual({ error: true, message: 'Boom!' })
   })
 })
