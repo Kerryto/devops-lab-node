@@ -1,4 +1,4 @@
-/**
+/* /**
  * Express app configuration.
  * Responsibilities:
  *  - Base routes (/, /health)
