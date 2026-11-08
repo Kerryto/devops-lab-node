@@ -10,15 +10,22 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { errorHandler } from './utils/errorHandler.js'
+import appointmentsRouter from './routes/appointments.route.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
 
+// Parse JSON bodies BEFORE any route (otherwise req.body is undefined)
+app.use(express.json())
+
 // Simple root + health endpoints
 app.get('/', (_req, res) => res.json({ ok: true, message: 'Hello from CI/CD demo 👋' }))
 app.get('/health', (_req, res) => res.status(200).send('OK'))
+
+// Appointments API (SCRUM-63)
+app.use('/api/appointments', appointmentsRouter)
 
 // Auto-mount all routers placed under src/routes/auto
 const autoDir = path.join(__dirname, 'routes', 'auto')
