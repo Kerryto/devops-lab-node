@@ -17,8 +17,9 @@ const isValidEmail = (email) => typeof email === 'string' && /^[^\s@]+@[^\s@]+\.
 const emailTaken = (email, exceptId) =>
   users.some(u => u.email.toLowerCase() === email.toLowerCase() && u.id !== exceptId)
 
-// Prochain identifiant libre : le plus grand id + 1 (jamais réutilisé après une suppression)
-const nextId = () => users.reduce((max, u) => Math.max(max, u.id), 0) + 1
+// Compteur d'identifiants : il ne recule jamais, donc un id n'est jamais réutilisé après une suppression
+let lastId = users.reduce((max, u) => Math.max(max, u.id), 0)
+const nextId = () => ++lastId
 
 // Vérifie les champs envoyés ; renvoie un message d'erreur ou null
 const validate = (body) => {
